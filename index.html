@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Video Splitter Pro</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap');
+  :root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c4dff;--accent2:#ff4d9a;--accent3:#4dffb0;--text:#e8e8f0;--glow:0 0 30px rgba(124,77,255,0.3)}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;min-height:100vh;overflow-x:hidden}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(124,77,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(124,77,255,0.04) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
+  .wrap{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:40px 24px 80px}
+  header{display:flex;align-items:center;gap:16px;margin-bottom:32px}
+  .logo{width:48px;height:48px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:var(--glow);flex-shrink:0}
+  .logo-t h1{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;background:linear-gradient(90deg,#fff 40%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .logo-t p{font-size:11px;color:#556;letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+  .badge{margin-left:auto;background:rgba(77,255,176,0.12);border:1px solid rgba(77,255,176,0.3);color:var(--accent3);font-size:10px;letter-spacing:2px;padding:4px 10px;border-radius:4px;text-transform:uppercase}
+  .srv{display:inline-flex;align-items:center;gap:8px;font-size:11px;padding:8px 14px;border-radius:8px;margin-bottom:20px;border:1px solid var(--border);background:var(--surface)}
+  .dot{width:8px;height:8px;border-radius:50%}
+  .dot.on{background:var(--accent3);box-shadow:0 0 8px var(--accent3);animation:p 2s infinite}
+  .dot.off{background:#f44}
+  .dot.chk{background:#fd4;animation:p 1s infinite}
+  @keyframes p{0%,100%{opacity:1}50%{opacity:.4}}
+  .upload-zone{border:2px dashed var(--border);border-radius:20px;background:var(--surface);padding:48px 32px;text-align:center;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;margin-bottom:32px}
+  .upload-zone::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 100%,rgba(124,77,255,.08),transparent 60%);pointer-events:none}
+  .upload-zone:hover,.upload-zone.over{border-color:var(--accent);box-shadow:var(--glow)}
+  .upload-zone.busy{pointer-events:none;border-color:var(--accent2)}
+  #fi{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+  .uico{font-size:48px;margin-bottom:16px}
+  .upload-zone h2{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:8px}
+  .upload-zone p{color:#667;font-size:13px}
+  .uprog{display:none;margin-top:16px}
+  .uprbar{height:3px;background:var(--surface2);border-radius:2px;overflow:hidden}
+  .uprfill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;transition:width .3s;animation:sh 1.5s infinite}
+  @keyframes sh{0%{background-position:0%}100%{background-position:200%}}
+  .vsec{display:none;background:var(--surface);border-radius:20px;overflow:hidden;border:1px solid var(--border);margin-bottom:32px}
+  .vsec.vis{display:block}
+  .vwrap{background:#000;aspect-ratio:16/9;max-height:320px;display:flex;align-items:center;justify-content:center}
+  .vwrap video{width:100%;height:100%;object-fit:contain}
+  .sbar{display:flex;border-top:1px solid var(--border)}
+  .st{flex:1;text-align:center;padding:14px 8px;border-right:1px solid var(--border)}
+  .st:last-child{border-right:none}
+  .stv{font-family:'Syne',sans-serif;font-size:18px;font-weight:700}
+  .stl{font-size:10px;color:#445;letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px;margin-bottom:24px}
+  .ptit{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#667;margin-bottom:20px;display:flex;align-items:center;gap:8px}
+  .ptit::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent)}
+  .presets{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .pb{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:16px 12px;cursor:pointer;transition:all .25s;text-align:left}
+  .pb:hover,.pb.active{transform:translateY(-2px)}
+  .pb.reels:hover,.pb.reels.active{border-color:#ff4d9a;box-shadow:0 0 20px rgba(255,77,154,.2);background:rgba(255,77,154,.06)}
+  .pb.tiktok:hover,.pb.tiktok.active{border-color:#4dffb0;box-shadow:0 0 20px rgba(77,255,176,.2);background:rgba(77,255,176,.06)}
+  .pb.shorts:hover,.pb.shorts.active{border-color:#ffd04d;box-shadow:0 0 20px rgba(255,208,77,.2);background:rgba(255,208,77,.06)}
+  .pico{font-size:20px;margin-bottom:8px}
+  .pn{font-family:'Syne',sans-serif;font-size:15px;font-weight:700}
+  .pm{font-size:11px;color:#556;margin-top:4px}
+  .pd{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:middle}
+  .reels .pd{background:#ff4d9a}.tiktok .pd{background:#4dffb0}.shorts .pd{background:#ffd04d}
+  .crow{display:flex;align-items:center;gap:16px;margin-top:16px}
+  .ctgl{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;font-size:13px;color:#667}
+  .tsw{width:36px;height:20px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;position:relative;transition:.3s;flex-shrink:0}
+  .tsw::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:#556;border-radius:50%;transition:.3s}
+  .tsw.on{background:rgba(124,77,255,.3);border-color:var(--accent)}
+  .tsw.on::after{left:18px;background:var(--accent)}
+  .dinp{display:flex;align-items:center;gap:8px;opacity:.3;pointer-events:none;transition:.3s}
+  .dinp.en{opacity:1;pointer-events:all}
+  .dinp input{background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:16px;padding:8px 12px;width:80px;text-align:center;outline:none}
+  .dinp input:focus{border-color:var(--accent)}
+  .dinp span{color:#556;font-size:12px}
+  .tll{display:flex;justify-content:space-between;font-size:11px;color:#445;margin-bottom:6px}
+  .tl{position:relative;height:44px;background:var(--surface2);border-radius:8px;overflow:hidden;cursor:pointer;border:1px solid var(--border)}
+  .tlf{position:absolute;top:0;left:0;bottom:0;background:linear-gradient(90deg,rgba(124,77,255,.25),rgba(255,77,154,.25));border-right:2px solid var(--accent2);pointer-events:none;transition:width .2s}
+  .tlc{position:absolute;top:0;bottom:0;width:2px;background:var(--accent);box-shadow:0 0 8px var(--accent);pointer-events:none}
+  .tlinf{font-size:11px;color:#445;margin-top:6px;text-align:center}
+  .srow{display:flex;align-items:center;gap:12px}
+  .sctls{display:flex;gap:8px;flex-wrap:wrap}
+  .sb{background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:#667;font-family:'DM Mono',monospace;font-size:13px;padding:8px 16px;cursor:pointer;transition:all .2s}
+  .sb:hover{border-color:#556;color:var(--text)}
+  .sb.active{background:rgba(124,77,255,.15);border-color:var(--accent);color:var(--accent)}
+  .spd{margin-left:auto;font-family:'Syne',sans-serif;font-size:28px;font-weight:800;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .rrow{display:flex;gap:12px}
+  .rc{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:all .2s}
+  .rc.active{border-color:var(--accent3);background:rgba(77,255,176,.05)}
+  .rp{border:1px solid #334;border-radius:4px;background:#0a0a0f;display:flex;align-items:center;justify-content:center;font-size:9px;color:#445;flex-shrink:0}
+  .rport{width:20px;height:35px}.rland{width:35px;height:20px}.rsq{width:26px;height:26px}
+  .rc.active .rp{border-color:var(--accent3)}
+  .rl{font-size:12px;color:#667}.rl strong{display:block;font-size:13px;color:var(--text);margin-bottom:2px}
+  .procbtn{width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:14px;color:#fff;font-family:'Syne',sans-serif;font-size:16px;font-weight:700;padding:18px;cursor:pointer;letter-spacing:.5px;transition:all .3s;margin-top:8px}
+  .procbtn:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(124,77,255,.4)}
+  .procbtn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+  .pw{display:none;margin-top:16px}
+  .pw.vis{display:block}
+  .ppct{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;text-align:center;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .pbg{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;margin:8px 0}
+  .pf{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent3));background-size:200%;width:0%;transition:width .4s;animation:sh 2s infinite}
+  .ptxt{font-size:12px;color:#667;text-align:center}
+  .outp{display:none}.outp.vis{display:block}
+  .segi{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:10px;animation:sl .3s ease forwards;opacity:0}
+  @keyframes sl{from{transform:translateX(-12px);opacity:0}to{transform:translateX(0);opacity:1}}
+  .sn{width:30px;height:30px;background:rgba(124,77,255,.15);border:1px solid rgba(124,77,255,.3);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--accent);font-weight:600;flex-shrink:0}
+  .si{flex:1;min-width:0}
+  .snm{font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .smt{font-size:11px;color:#556;margin-top:3px}
+  .sact{display:flex;gap:6px;flex-shrink:0}
+  .sbtn{background:transparent;border:1px solid var(--border);border-radius:6px;color:#667;font-size:11px;padding:5px 10px;cursor:pointer;transition:all .2s;font-family:'DM Mono',monospace;text-decoration:none;display:inline-flex;align-items:center;gap:4px}
+  .sbtn:hover{border-color:var(--accent);color:var(--accent)}
+  .sbtn.dl{border-color:rgba(77,255,176,.3);color:var(--accent3)}
+  .sbtn.dl:hover{border-color:var(--accent3);background:rgba(77,255,176,.08)}
+  .notif{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--accent3);border-radius:12px;padding:12px 16px;font-size:13px;color:var(--accent3);box-shadow:0 8px 24px rgba(0,0,0,.4);transform:translateY(80px);opacity:0;transition:all .4s cubic-bezier(.34,1.56,.64,1);z-index:999;max-width:320px}
+  .notif.show{transform:translateY(0);opacity:1}
+  .notif.err{border-color:#f44;color:#f66}
+  ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+  @media(max-width:600px){.presets{grid-template-columns:1fr}.rrow{flex-direction:column}.sbar{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">✂️</div>
+    <div class="logo-t">
+      <h1>Video Splitter Pro</h1>
+      <p>Real FFmpeg · Split · Resize · Speed</p>
+    </div>
+    <span class="badge">⚡ LIVE</span>
+  </header>
+
+  <div class="srv">
+    <div class="dot chk" id="sdot"></div>
+    <span id="stxt">កំពុងភ្ជាប់...</span>
+  </div>
+
+  <div class="upload-zone" id="uz">
+    <input type="file" id="fi" accept="video/*">
+    <div class="uico" id="uico">🎬</div>
+    <h2 id="utit">Drop your video here</h2>
+    <p id="udesc">ទម្លាក់ MP4, MOV, AVI, MKV ឬចុចដើម្បីជ្រើស</p>
+    <div class="uprog" id="uprog">
+      <div class="uprbar"><div class="uprfill" id="uprf"></div></div>
+      <p style="margin-top:8px;font-size:12px;color:#667" id="uptxt">កំពុងផ្ទុក...</p>
+    </div>
+  </div>
+
+  <div class="vsec" id="vsec">
+    <div class="vwrap"><video id="vp" controls></video></div>
+    <div class="sbar">
+      <div class="st"><div class="stv" id="sDur">—</div><div class="stl">Duration</div></div>
+      <div class="st"><div class="stv" id="sSz">—</div><div class="stl">Size</div></div>
+      <div class="st"><div class="stv" id="sRes">—</div><div class="stl">Resolution</div></div>
+      <div class="st"><div class="stv" id="sSegs">—</div><div class="stl">Segments</div></div>
+    </div>
+  </div>
+
+  <div class="panel" id="sp" style="display:none">
+    <div class="ptit">📱 Social Media Presets</div>
+    <div class="presets">
+      <button class="pb reels active" onclick="selPreset(this,90)"><div class="pico">📸</div><div class="pn">Reels</div><div class="pm"><span class="pd"></span>90s · Instagram</div></button>
+      <button class="pb tiktok" onclick="selPreset(this,60)"><div class="pico">🎵</div><div class="pn">TikTok</div><div class="pm"><span class="pd"></span>60s · TikTok</div></button>
+      <button class="pb shorts" onclick="selPreset(this,30)"><div class="pico">▶️</div><div class="pn">Shorts</div><div class="pm"><span class="pd"></span>30s · YouTube</div></button>
+    </div>
+    <div class="crow">
+      <label class="ctgl" onclick="togCust()"><div class="tsw" id="ctgl"></div><span>Custom Duration</span></label>
+      <div class="dinp" id="dinp"><input type="number" id="cdur" min="5" max="600" value="45" oninput="updCust()"><span>វិនាទី</span></div>
+    </div>
+
+    <div class="ptit" style="margin-top:28px">⏱ Segment Preview</div>
+    <div class="tll"><span>0:00</span><span id="tlm">—</span><span id="tle">—</span></div>
+    <div class="tl" id="tl" onclick="seekV(event)">
+      <div class="tlf" id="tlf" style="width:30%"></div>
+      <div class="tlc" id="tlc" style="left:30%"></div>
+    </div>
+    <div class="tlinf" id="tli">—</div>
+
+    <div class="ptit" style="margin-top:28px">⚡ Playback Speed</div>
+    <div class="srow">
+      <div class="sctls">
+        <button class="sb" onclick="setSpd(0.25)">0.25×</button>
+        <button class="sb" onclick="setSpd(0.5)">0.5×</button>
+        <button class="sb active" onclick="setSpd(1)">1×</button>
+        <button class="sb" onclick="setSpd(1.5)">1.5×</button>
+        <button class="sb" onclick="setSpd(2)">2×</button>
+      </div>
+      <div class="spd" id="spdD">1×</div>
+    </div>
+
+    <div class="ptit" style="margin-top:28px">🖼 Output Format</div>
+    <div class="rrow">
+      <div class="rc active" onclick="selR('9:16','1080×1920',this)"><div class="rp rport">9:16</div><div class="rl"><strong>Portrait 9:16</strong>1080×1920 · Mobile</div></div>
+      <div class="rc" onclick="selR('16:9','1920×1080',this)"><div class="rp rland">16:9</div><div class="rl"><strong>Landscape 16:9</strong>1920×1080 · Desktop</div></div>
+      <div class="rc" onclick="selR('1:1','1080×1080',this)"><div class="rp rsq">1:1</div><div class="rl"><strong>Square 1:1</strong>1080×1080 · Feed</div></div>
+    </div>
+
+    <button class="procbtn" id="procbtn" onclick="startProc()">✂️ Split &amp; Process Video</button>
+    <div class="pw" id="pw">
+      <div class="ppct" id="ppct">0%</div>
+      <div class="pbg"><div class="pf" id="pf"></div></div>
+      <div class="ptxt" id="ptxt">កំពុងរៀបចំ...</div>
+    </div>
+  </div>
+
+  <div class="panel outp" id="outp">
+    <div class="ptit">📦 Output Segments — Ready to Download</div>
+    <div id="segl"></div>
+  </div>
+</div>
+
+<div class="notif" id="ntf"></div>
+
+<script>
+const API = window.location.origin;
+let vpath=null,vdur=0,segdur=90,spd=1,rat='9:16',res='1080×1920',custM=false,poll=null;
+
+async function chkSrv(){
+  try{const r=await fetch(API+'/ping',{signal:AbortSignal.timeout(2000)});const d=await r.json();
+    if(d.ok){document.getElementById('sdot').className='dot on';document.getElementById('stxt').textContent='Server online · FFmpeg ready';return true}}
+  catch(e){}
+  document.getElementById('sdot').className='dot off';document.getElementById('stxt').textContent='Server offline — run server.py';return false;
+}
+chkSrv();setInterval(chkSrv,8000);
+
+const uz=document.getElementById('uz'),fi=document.getElementById('fi'),vp=document.getElementById('vp');
+uz.addEventListener('dragover',e=>{e.preventDefault();uz.classList.add('over')});
+uz.addEventListener('dragleave',()=>uz.classList.remove('over'));
+uz.addEventListener('drop',e=>{e.preventDefault();uz.classList.remove('over');const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('video/'))upV(f)});
+fi.addEventListener('change',e=>{if(e.target.files[0])upV(e.target.files[0])});
+
+async function upV(file){
+  const ok=await chkSrv();if(!ok){ntf('❌ Server offline!',1);return}
+  uz.classList.add('busy');
+  document.getElementById('uprog').style.display='block';
+  document.getElementById('utit').textContent='កំពុងវិភាគ Video...';
+  document.getElementById('udesc').textContent=file.name;
+  fi.disabled=true;
+  let p=0,iv=setInterval(()=>{p=Math.min(p+Math.random()*15,85);document.getElementById('uprf').style.width=p+'%'},200);
+  const fd=new FormData();fd.append('video',file);
+  try{
+    const r=await fetch(API+'/probe',{method:'POST',body:fd});
+    const d=await r.json();clearInterval(iv);
+    if(d.error)throw new Error(d.error);
+    document.getElementById('uprf').style.width='100%';
+    vpath=d.path;vdur=d.duration;
+    vp.src=URL.createObjectURL(file);
+    document.getElementById('vsec').classList.add('vis');
+    document.getElementById('sp').style.display='block';
+    document.getElementById('sDur').textContent=fmt(vdur);
+    document.getElementById('sSz').textContent=fmtB(d.size);
+    document.getElementById('sRes').textContent=d.width+'×'+d.height;
+    updSegs();updTL();
+    setTimeout(()=>{uz.classList.remove('busy');document.getElementById('uprog').style.display='none';document.getElementById('utit').textContent='✅ '+file.name;document.getElementById('udesc').textContent='ចុចឬទម្លាក់ video ថ្មី';fi.disabled=false},500);
+    ntf('✅ Video បានផ្ទុករួច!');
+  }catch(e){clearInterval(iv);uz.classList.remove('busy');document.getElementById('uprog').style.display='none';document.getElementById('utit').textContent='Drop your video here';document.getElementById('udesc').textContent='ទម្លាក់ MP4, MOV, AVI, MKV';fi.disabled=false;ntf('❌ '+e.message,1)}
+}
+
+function fmt(s){s=Math.round(s);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}
+function fmtB(b){return b>1e9?(b/1e9).toFixed(1)+'GB':b>1e6?(b/1e6).toFixed(1)+'MB':(b/1e3).toFixed(0)+'KB'}
+function updSegs(){if(vdur)document.getElementById('sSegs').textContent=Math.ceil(vdur/segdur)}
+function updTL(){
+  if(!vdur)return;
+  const pct=Math.min((segdur/vdur)*100,100);
+  document.getElementById('tlf').style.width=pct+'%';
+  document.getElementById('tlc').style.left=pct+'%';
+  document.getElementById('tle').textContent=fmt(vdur);
+  document.getElementById('tlm').textContent=fmt(vdur/2);
+  document.getElementById('tli').textContent=`Segment ទី 1: 0:00 – ${fmt(segdur)} · សរុប ${Math.ceil(vdur/segdur)} segments`;
+}
+function selPreset(b,d){document.querySelectorAll('.pb').forEach(x=>x.classList.remove('active'));b.classList.add('active');segdur=d;if(custM)togCust();updSegs();updTL()}
+function togCust(){custM=!custM;document.getElementById('ctgl').classList.toggle('on',custM);document.getElementById('dinp').classList.toggle('en',custM);if(custM){document.querySelectorAll('.pb').forEach(x=>x.classList.remove('active'));updCust()}}
+function updCust(){if(!custM)return;segdur=Math.max(5,Math.min(600,parseInt(document.getElementById('cdur').value)||45));updSegs();updTL()}
+function setSpd(s){spd=s;vp.playbackRate=s;document.getElementById('spdD').textContent=s+'×';document.querySelectorAll('.sb').forEach(b=>b.classList.toggle('active',parseFloat(b.textContent)===s))}
+function selR(r,rs,el){document.querySelectorAll('.rc').forEach(c=>c.classList.remove('active'));el.classList.add('active');rat=r;res=rs}
+function seekV(e){if(!vdur)return;const rect=e.currentTarget.getBoundingClientRect();vp.currentTime=((e.clientX-rect.left)/rect.width)*vdur}
+
+async function startProc(){
+  if(!vpath){ntf('⚠️ Upload video ជាមុន',1);return}
+  const btn=document.getElementById('procbtn');
+  btn.disabled=true;
+  document.getElementById('pw').classList.add('vis');
+  document.getElementById('outp').classList.remove('vis');
+  document.getElementById('segl').innerHTML='';
+  try{
+    const r=await fetch(API+'/split',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({path:vpath,segmentDuration:segdur,speed:spd,ratio:rat,duration:vdur})});
+    const d=await r.json();if(d.error)throw new Error(d.error);
+    pollJob(d.job_id,btn);
+  }catch(e){btn.disabled=false;document.getElementById('pw').classList.remove('vis');ntf('❌ '+e.message,1)}
+}
+
+function pollJob(jid,btn){
+  clearInterval(poll);
+  poll=setInterval(async()=>{
+    try{
+      const r=await fetch(API+'/status/'+jid);const d=await r.json();
+      const p=d.progress||0;
+      document.getElementById('pf').style.width=p+'%';
+      document.getElementById('ppct').textContent=p+'%';
+      document.getElementById('ptxt').textContent=d.message||'...';
+      if(d.status==='done'){clearInterval(poll);btn.disabled=false;renderSegs(d.segments);ntf('🎉 '+d.segments.length+' segments ready!')}
+      else if(d.status==='error'){clearInterval(poll);btn.disabled=false;ntf('❌ '+d.message,1)}
+    }catch(e){}
+  },800);
+}
+
+function renderSegs(segs){
+  const p=document.getElementById('outp'),l=document.getElementById('segl');
+  l.innerHTML='';p.classList.add('vis');
+  p.scrollIntoView({behavior:'smooth',block:'start'});
+  segs.forEach((s,i)=>{
+    const d=document.createElement('div');d.className='segi';d.style.animationDelay=(i*.07)+'s';
+    d.innerHTML=`<div class="sn">${String(s.index).padStart(2,'0')}</div>
+      <div class="si"><div class="snm">${s.filename}</div>
+      <div class="smt">${fmt(s.start)} – ${fmt(s.end)} · ${fmt(s.duration)} · ${res} · ${spd}× · ${fmtB(s.size)}</div></div>
+      <div class="sact">
+        <button class="sbtn" onclick="prevAt(${s.start})">▶ Preview</button>
+        <a class="sbtn dl" href="${API}${s.download_url}" download="${s.filename}">⬇ Download</a>
+      </div>`;
+    l.appendChild(d);
+  });
+}
+
+function prevAt(t){vp.currentTime=t;vp.playbackRate=spd;vp.play();vp.scrollIntoView({behavior:'smooth',block:'center'})}
+
+let nt;
+function ntf(msg,err=0){const n=document.getElementById('ntf');n.textContent=msg;n.className='notif show'+(err?' err':'');clearTimeout(nt);nt=setTimeout(()=>n.classList.remove('show'),4000)}
+</script>
+</body>
+</html>
